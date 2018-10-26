@@ -20,7 +20,7 @@ declare commands;
 commands=$(cat <<EOF
 for var in oneiter; do
 echo '****************************';
-cat /etc/redhat-release 2>/dev/null || /etc/debian_version 2>/dev/null || echo 'Unknown OS';
+cat /etc/redhat-release 2>/dev/null || cat /etc/os-release | grep -Po '(?<=PRETTY_NAME=").*(?=")' 2>/dev/null || echo 'Unknown OS';
 uptime; echo;
 df -h; echo;
 free -m;
@@ -42,6 +42,6 @@ if [[ ! -z "$keygen" ]]; then
     echo "?func=auth&key=$key" | xsel -ib 2>/dev/null || echo "Failed copy key to clipboard. Please install xsel"
 fi
 # Go. If error try without commands
-ssh sup@ssh -t "go $@ -t \"$commands bash -l\"" || ssh sup@ssh -t "go $@"; 
+ssh sup@ssh -t "go $@ -t \"$commands bash -l\"" || ssh $@ -t "$commands bash -l" || ssh sup@ssh -t "go $@"; 
 # ssh $@ -t "$commands bash -l" 
 }
