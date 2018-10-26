@@ -8,7 +8,7 @@ key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1 || echo "k3
 # List of commands to gen auth key
 keygen=$(cat <<EOF
 sbin/mgrctl mgr | cut -f2 -d= | while read i; do sbin/mgrctl -m \\\$i session.newkey key=$key; done;
-echo '?func=auth&key='$key;
+sbin/mgrctl mgr | cut -f2 -d= | while read i; do echo 'https://'$1':1500/'\\\$i'?func=auth&key='$key; done;
 EOF
 )
 else
@@ -20,7 +20,7 @@ declare commands;
 commands=$(cat <<EOF
 for var in oneiter; do
 echo '****************************';
-cat /etc/redhat-release 2>/dev/null || cat /etc/os-release | grep -Po '(?<=PRETTY_NAME=").*(?=")' 2>/dev/null || echo 'Unknown OS';
+cat /etc/redhat-release 2>/dev/null || cat /etc/os-release | grep -Po '(?<=PRETTY_NAME=\").*(?=\")' 2>/dev/null || echo 'Unknown OS';
 uptime; echo;
 df -h; echo;
 free -m;
