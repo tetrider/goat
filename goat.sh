@@ -7,8 +7,12 @@ if [[ ! -z "$(echo $@ | grep '\-p[0-9]')" ]]; then
 key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1 || echo "k3krvQG5N3ezgFr8l5TL9h5m")
 # List of commands to gen auth key
 keygen=$(cat <<EOF
-sbin/mgrctl mgr | cut -f2 -d= | while read i; do sbin/mgrctl -m \\\$i session.newkey key=$key; done;
-sbin/mgrctl mgr | cut -f2 -d= | while read i; do echo 'https://'$1':1500/'\\\$i'?func=auth&key='$key; done;
+sbin/mgrctl mgr | cut -f2 -d= | while read mgr; do sbin/mgrctl -m \\\$mgr session.newkey key=$key; done;
+sbin/mgrctl mgr | cut -f2 -d= | while read mgr; do 
+sbin/ihttpd | cut -f3 -d: | sort | uniq | while read port; do
+echo 'https://'$1':'\\\$port'/'\\\$mgr'?func=auth&key='$key; 
+done;
+done;
 EOF
 )
 else
