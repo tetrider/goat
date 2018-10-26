@@ -15,9 +15,18 @@ done;
 done;
 EOF
 )
+freeaccess=""
 else
 # Important. Clear var if standart port    
 keygen=""
+freeaccess=$(cat <<EOF
+sbin/mgrctl mgr | cut -f2 -d= | while read mgr; do 
+sbin/ihttpd | cut -f3 -d: | sort | uniq | while read port; do
+echo 'https://ssh.ispsystem.net/?submit=go&url=https://'$1':'\\\$port'/'\\\$mgr; 
+done;
+done;
+EOF
+)
 fi
 # Main list of commands
 declare commands;
@@ -38,6 +47,7 @@ echo;
 ps -f -C core || echo 'NO core process';
 echo;
 $keygen
+$freeaccess
 done;
 EOF
 )
