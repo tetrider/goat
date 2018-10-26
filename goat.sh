@@ -16,6 +16,7 @@ else
 keygen=""
 fi
 # Main list of commands
+declare commands;
 commands=$(cat <<EOF
 for var in oneiter; do
 echo '****************************';
@@ -38,7 +39,7 @@ EOF
 )
 # Copy command and authkey to clipboard 
 if [[ ! -z "$keygen" ]]; then
-    echo "?func=auth&key=$key" | xsel -i 2>/dev/null || echo "Failed copy key to clipboard. Please install xsel"
+    echo "?func=auth&key=$key" | xsel -ib 2>/dev/null || echo "Failed copy key to clipboard. Please install xsel"
 fi
 # Go. If error try without commands
 ssh sup@ssh -t "go $@ -t \"$commands bash -l\"" || ssh sup@ssh -t "go $@"; 
