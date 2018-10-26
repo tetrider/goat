@@ -1,5 +1,5 @@
 # goat
 Installing:
-curl -s 'https://raw.githubusercontent.com/tetrider/goat/master/goat.sh' >> ~/.bashrc
-source ~/.bashrc
-goat <ip>
+1. curl -s 'https://raw.githubusercontent.com/tetrider/goat/master/goat.sh' >> ~/.bashrc
+2. source ~/.bashrc
+3. goat <ip>
