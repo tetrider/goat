@@ -7,8 +7,8 @@ if [[ ! -z "$(echo $@ | grep '\-p[0-9]')" ]]; then
 key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1 || echo "k3krvQG5N3ezgFr8l5TL9h5m")
 # List of commands to gen auth key
 keygen=$(cat <<EOF
-sbin/mgrctl mgr | cut -f2 -d= | while read mgr; do sbin/mgrctl -m \\\$mgr session.newkey key=$key; done;
-sbin/mgrctl mgr | cut -f2 -d= | while read mgr; do 
+sbin/mgrctl mgr | cut -f2 -d= | sed '/^\(vmmini\|ispmgrnode\)$/d' | while read mgr; do sbin/mgrctl -m \\\$mgr session.newkey key=$key; done;
+sbin/mgrctl mgr | cut -f2 -d= | sed '/^\(vmmini\|ispmgrnode\)$/d' | while read mgr; do 
 sbin/ihttpd | cut -f3 -d: | sort | uniq | while read port; do
 echo 'https://'$1':'\\\$port'/'\\\$mgr'?func=auth&key='$key; 
 done;
@@ -20,7 +20,7 @@ else
 # Important. Clear var if standart port    
 keygen=""
 freeaccess=$(cat <<EOF
-sbin/mgrctl mgr | cut -f2 -d= | while read mgr; do 
+sbin/mgrctl mgr | cut -f2 -d= | sed '/^\(vmmini\|ispmgrnode\)$/d' | while read mgr; do 
 sbin/ihttpd | cut -f3 -d: | sort | uniq | while read port; do
 echo 'https://ssh.ispsystem.net/?submit=go&url=https://'$1':'\\\$port'/'\\\$mgr; 
 done;
@@ -56,6 +56,7 @@ if [[ ! -z "$keygen" ]]; then
     echo "?func=auth&key=$key" | xsel -ib 2>/dev/null || echo "Failed copy key to clipboard. Please install xsel"
 fi
 # Go. If error try without commands
+# echo $commands
 ssh sup@ssh -t "go $@ -t \"$commands bash -l\"" || ssh $@ -t "$commands bash -l" || ssh sup@ssh -t "go $@"; 
 # ssh $@ -t "$commands bash -l" 
 }
