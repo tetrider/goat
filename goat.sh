@@ -6,6 +6,7 @@ if [[ ! -z "$(echo $@ | grep '\-p[0-9]')" ]]; then
 # Generate key
 key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1 || echo "k3krvQG5N3ezgFr8l5TL9h5m")
 # List of commands to gen auth key
+declare keygen
 keygen=$(cat <<EOF
 sbin/mgrctl mgr | cut -f2 -d= | sed '/^\(vmmini\|ispmgrnode\)$/d' | while read mgr; do sbin/mgrctl -m \\\$mgr session.newkey key=$key; done;
 sbin/mgrctl mgr | cut -f2 -d= | sed '/^\(vmmini\|ispmgrnode\)$/d' | while read mgr; do 
@@ -19,6 +20,7 @@ freeaccess=""
 else
 # Important. Clear var if standart port    
 keygen=""
+declare freeaccess
 freeaccess=$(cat <<EOF
 sbin/mgrctl mgr | cut -f2 -d= | sed '/^\(vmmini\|ispmgrnode\)$/d' | while read mgr; do 
 sbin/ihttpd | cut -f3 -d: | sort | uniq | while read port; do
@@ -29,7 +31,7 @@ EOF
 )
 fi
 # Main list of commands
-declare commands;
+declare commands
 commands=$(cat <<EOF
 for var in oneiter; do
 echo '****************************';
