@@ -8,8 +8,8 @@ key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1 || echo "k3
 # List of commands to gen auth key
 declare keygen
 keygen=$(cat <<EOF
-sbin/mgrctl mgr | cut -f2 -d= | sed '/^\(vmmini\|ispmgrnode\)$/d' | while read mgr; do sbin/mgrctl -m \\\$mgr session.newkey key=$key; done;
-sbin/mgrctl mgr | cut -f2 -d= | sed '/^\(vmmini\|ispmgrnode\)$/d' | while read mgr; do 
+sbin/mgrctl mgr | cut -f2 -d= | sed '/\(mini\|node\)$/d' | while read mgr; do sbin/mgrctl -m \\\$mgr session.newkey key=$key; done;
+sbin/mgrctl mgr | cut -f2 -d= | sed '/\(mini\|node\)$/d' | while read mgr; do 
 sbin/ihttpd | cut -f3 -d: | sort | uniq | while read port; do
 echo 'https://'$1':'\\\$port'/'\\\$mgr'?func=auth&key='$key; 
 done;
