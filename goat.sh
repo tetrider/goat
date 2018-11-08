@@ -1,64 +1,41 @@
 #!/bin/bash
 # GO Advanced Testing
 goat(){ 
-# Check port option in command. Use -p ?? (with space) to skip key generation
-if [[ ! -z "$(echo $@ | grep '\-p[0-9]')" ]]; then
 # Generate key
-key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1 || echo "k3krvQG5N3ezgFr8l5TL9h5m")
-# List of commands to gen auth key
-declare keygen
-keygen=$(cat <<EOF
-sbin/mgrctl mgr | cut -f2 -d= | sed '/\(mini\|node\)$/d' | while read mgr; do sbin/mgrctl -m \\\$mgr session.newkey key=$key; done;
-sbin/mgrctl mgr | cut -f2 -d= | sed '/\(mini\|node\)$/d' | while read mgr; do 
-sbin/ihttpd | cut -f3 -d: | sort | uniq | while read port; do
-echo 'https://'$1':'\\\$port'/'\\\$mgr'?func=auth&key='$key; 
-done;
-done;
-EOF
-)
-freeaccess=""
-else
-# Important. Clear var if standart port    
-keygen=""
-declare freeaccess
-freeaccess=$(cat <<EOF
-sbin/mgrctl mgr | cut -f2 -d= | sed '/^\(vmmini\|ispmgrnode\)$/d' | while read mgr; do 
-sbin/ihttpd | cut -f3 -d: | sort | uniq | while read port; do
-echo 'https://ssh.ispsystem.net/?submit=go&url=https://'$1':'\\\$port'/'\\\$mgr; 
-done;
-done;
-EOF
-)
-fi
+key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1)
 # Main list of commands
-declare commands
-commands=$(cat <<EOF
+commands_line=$(cat <<EOF
 for var in oneiter; do
-echo '****************************';
-cat /etc/redhat-release 2>/dev/null || cat /etc/os-release | grep -Po '(?<=PRETTY_NAME=\").*(?=\")' 2>/dev/null || echo 'Unknown OS';
-uptime; echo;
-df -h; echo;
-free -m;
-echo '****************************';
-cd /usr/local/mgr5 2>/dev/null || { echo 'NO mgr5 directory'; break; };
-bin/core -V >/dev/null 2>&1 && printf 'CORE version ' && bin/core -V || { echo 'NO bin/core'; break; };
-sbin/mgrctl mgr | cut -f2 -d= | while read i; do bin/core \\\$i -i; done;
-echo;
-sbin/ihttpd || echo 'ihttpd ERROR';
-echo;
-ps -f -C core || echo 'NO core process';
-echo;
-$keygen
-$freeaccess
+    echo '****************************';
+    cat /etc/redhat-release 2>/dev/null || cat /etc/os-release | grep -Po '(?<=PRETTY_NAME=\").*(?=\")' 2>/dev/null || echo 'Unknown OS';
+    uptime; echo;
+    df -h; echo;
+    free -m;
+    echo '****************************';
+    cd /usr/local/mgr5 2>/dev/null || { echo 'NO mgr5 directory'; break; };
+    echo 'bin/CORE 1>/dev/null' | tr '[:upper:]' '[:lower:]' | sh;
+    sbin/mgrctl mgr | cut -f2 -d= | while read i; do 
+        echo "bin/CORE \\\$i -i" | tr '[:upper:]' '[:lower:]' | sh;
+    done;
+    echo;
+    sbin/ihttpd || echo 'ihttpd ERROR';
+    echo;
+    echo 'ps -f -C coRE' | sed 's/RE/re/' | sh;
+    echo;
+    sbin/mgrctl mgr | cut -f2 -d= | sed '/\(mini\|node\)$/d' | while read mgr; do 
+        sbin/mgrctl -m \\\$mgr session.newkey key=$key; 
+        sbin/ihttpd | cut -f3 -d: | sed '/80/d' | sort | uniq | while read port; do
+            echo 'https://'$1':'\\\$port'/'\\\$mgr'?func=auth&key='$key; 
+        done;
+    done;
 done;
 EOF
-)
+) 
 # Copy command and authkey to clipboard 
-if [[ ! -z "$keygen" ]]; then
-    echo "?func=auth&key=$key" | xsel -ib 2>/dev/null || echo "Failed copy key to clipboard. Please install xsel"
-fi
+# echo "?func=auth&key=$key" | xsel -ib 2>/dev/null || echo "Failed copy key to clipboard. Please install xsel"
+
 # Go. If error try without commands
-# echo $commands
-ssh sup@ssh -t "go $@ -t \"$commands bash -l\"" || ssh $@ -t "$commands bash -l" || ssh sup@ssh -t "go $@"; 
+echo $commands_line
+ssh sup@ssh -t "go $@ -t \"$commands_line bash -l\"" || ssh sup@ssh -t "go $@"; 
 # ssh $@ -t "$commands bash -l" 
 }
