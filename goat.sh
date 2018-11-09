@@ -1,9 +1,12 @@
 #!/bin/bash
 # GO Advanced Testing
 goat(){ 
-# Generate key
-key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1)
-# Main list of commands
+    # Options
+    aliases_forwarding=0
+    xsel_copy_key=0
+    # Generate key
+    key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1)
+    # Main list of commands
 commands_line=$(cat <<EOF
 for fakeiter in fakecycle; do
     echo '***';
@@ -30,17 +33,26 @@ for fakeiter in fakecycle; do
         done;
     done;
 done;
-alias less="less -R";
 EOF
 ) 
-# Copy command and authkey to clipboard 
-# echo "?func=auth&key=$key" | xsel -ib 2>/dev/null || echo "Failed copy key to clipboard. Please install xsel"
+    # Aliases list
+aliases_line=$(cat <<EOF
+. ~/.bashrc; 
+alias less=less\ -R;
+EOF
+)
+    # Copy command and authkey to clipboard 
+    if [ "$xsel_copy_key" = "1" ]; then
+        echo "?func=auth&key=$key" | xsel -ib 2>/dev/null || echo "Failed copy key to clipboard. Please install xsel"
+    fi
 
-# Open default CP in browser
-# xdg-open "https://$1:1500?func=auth&key=$key"
+    # Open default CP in browser
+    # xdg-open "https://$1:1500?func=auth&key=$key"
 
-# Go. If error try without commands
-# echo $commands_line
-ssh sup@ssh -t "go $@ -t \"$commands_line bash -l\"" || ssh sup@ssh -t "go $@"; 
-# ssh $@ -t "$commands_line bash -l" 
+    # Go. If error try without commands
+    if [ "$aliases_forwarding" = "1" ]; then
+        ssh sup@ssh -t "go $@ -t \"$commands_line bash --rcfile <( echo '$aliases_line' )\"" || ssh sup@ssh -t "go $@"; 
+    else
+        ssh sup@ssh -t "go $@ -t \"$commands_line bash -l\"" || ssh sup@ssh -t "go $@";
+    fi
 }
