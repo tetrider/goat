@@ -27,7 +27,7 @@ goat(){
         pwgen -s 24 1 | while read key; do
             sbin/mgrctl mgr | cut -f2 -d= | sed '/\(mini\|node\)$/d' | while read mgr; do 
                 sbin/mgrctl -m \\\$mgr session.newkey key=\\\$key; 
-                sbin/ihttpd | cut -f3 -d: | sed '/80/d' | sort | uniq | while read port; do
+                sbin/ihttpd | grep -o '[^:]*$' | sort | uniq | while read port; do
                     echo https://$1:\\\$port/\\\$mgr?func=auth\&key=\\\$key; 
                 done;
             done;
