@@ -24,7 +24,7 @@ goat(){
         echo;
         echo 'ps -f -C coRE' | sed 's/RE/re/' | sh;
         echo;
-        cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1 | while read key; do
+        pwgen -s 24 1 | while read key; do
             sbin/mgrctl mgr | cut -f2 -d= | sed '/\(mini\|node\)$/d' | while read mgr; do 
                 sbin/mgrctl -m \\\$mgr session.newkey key=\\\$key; 
                 sbin/ihttpd | cut -f3 -d: | sed '/80/d' | sort | uniq | while read port; do
@@ -39,6 +39,7 @@ EOF
     # Aliases list
     aliases_line=$(cat <<EOF
     . ~/.bashrc; 
+    alias less=less\ -R;
 EOF
     )
 
