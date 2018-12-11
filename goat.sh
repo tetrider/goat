@@ -17,7 +17,7 @@ goat(){
         cd /usr/local/mgr5 || break;
         sbin/mgrctl mgr 1>/dev/null || break;
         sbin/mgrctl mgr | cut -f2 -d= | while read i; do 
-            echo "bin/coRE \\\$i -i" | sed 's/RE/re/' | sh;
+            echo "bin/coRE \$i -i" | sed 's/RE/re/' | sh;
         done;
         echo;
         sbin/ihttpd || break;
@@ -26,9 +26,9 @@ goat(){
         echo;
         pwgen -s 24 1 | while read key; do
             sbin/mgrctl mgr | cut -f2 -d= | sed '/\(mini\|node\)$/d' | while read mgr; do 
-                sbin/mgrctl -m \\\$mgr session.newkey key=\\\$key; 
-                sbin/ihttpd | grep -o '[^:]*$' | sort | uniq | while read port; do
-                    echo https://$1:\\\$port/\\\$mgr?func=auth\&key=\\\$key; 
+                sbin/mgrctl -m \$mgr session.newkey key=\$key; 
+                sbin/ihttpd | grep -o '[^:]*$' | sed '/80/d' | sort | uniq | while read port; do
+                    echo https://$1:\$port/\$mgr?func=auth\&key=\$key; 
                 done;
             done;
         done;
@@ -45,8 +45,8 @@ EOF
 
     # Go. If error try without commands
     if [ "$aliases_forwarding" = "1" ]; then
-        ssh sup@ssh -t "go $@ -t \"$commands_line bash --rcfile <( echo '$aliases_line' )\"" || ssh sup@ssh -t "go $@"; 
+        ssh sup@ssh -t go $@ -t "$commands_line bash --rcfile <( echo '$aliases_line' )" || ssh sup@ssh -t "go $@"; 
     else
-        ssh sup@ssh -t "go $@ -t \"$commands_line bash -l\"" || ssh sup@ssh -t "go $@";
+        ssh sup@ssh -t go $@ -t "$commands_line bash -l" || ssh sup@ssh -t "go $@";
     fi
 }
