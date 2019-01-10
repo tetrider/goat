@@ -17,7 +17,7 @@ goat(){
         printf "\${GRAY}OS: \${NC}";
         cat /etc/redhat-release 2>/dev/null || cat /etc/os-release | grep -Po '(?<=PRETTY_NAME=\").*(?=\")' 2>/dev/null || echo 'Unknown OS';
         printf "\${GRAY}Uptime:\${NC}";
-        uptime | grep -o '[^:]*$';
+        uptime | grep -Po '(?<=up\ ).+?(?=\,  )';
         printf "\${GRAY}Load average: \${NC}";
         uptime | grep -Po '(?<=load average: ).*';
         if [[ ! -z \$(df -lh | grep -E '(8.%)|(9.%)|100%') ]]; then
