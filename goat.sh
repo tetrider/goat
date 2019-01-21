@@ -16,18 +16,18 @@ goat(){
         echo -e "\${GRAY}\${div}\${NC}";
         printf "\${GRAY}OS: \${NC}";
         cat /etc/redhat-release 2>/dev/null || cat /etc/os-release | grep -Po '(?<=PRETTY_NAME=\").*(?=\")' 2>/dev/null || echo 'Unknown OS';
-        printf "\${GRAY}Uptime:\${NC}";
+        printf "\${GRAY}Uptime: \${NC}";
         uptime | grep -Po '(?<=up\ ).+?(?=\,  )';
         printf "\${GRAY}Load average: \${NC}";
         uptime | grep -Po '(?<=load average: ).*';
-        if [[ ! -z \$(df -lh | grep -E '(8.%)|(9.%)|100%') ]]; then
+        if [[ ! -z \$(df -lhP | grep -E '(8.%)|(9.%)|100%') ]]; then
             echo -e "\${GRAY}Disk usage:";
             printf "\${GREEN}";
-            df -lh | grep -E '(8.%)' | awk '{print \$5, "used on", \$6}'; 
+            df -lhP | grep -E '(8.%)' | awk '{print \$5, "used on", \$6}'; 
             printf "\${YELLOW}";
-            df -lh | grep -E '(9.%)' | awk '{print \$5, "used on", \$6}'; 
+            df -lhP | grep -E '(9.%)' | awk '{print \$5, "used on", \$6}'; 
             printf "\${RED}";
-            df -lh | grep -E '100%' | awk '{print \$5, "used on", \$6}';
+            df -lhP | grep -E '100%' | awk '{print \$5, "used on", \$6}';
             printf "\${NC}";
         fi; 
         freemem=\$(free -mt | grep Total | awk '{print \$4}');
